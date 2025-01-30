@@ -10,7 +10,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <nav className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Mic className="w-6 h-6 text-indigo-600" />
+          <img src="/src/assets/img/logo.png" className="w-20 h-20 text-indigo-600" />
+          {/* <Mic className="w-6 h-6 text-indigo-600" /> */}
             <span className="text-xl font-semibold">Voice Vlog </span>
           </div>
           <button
