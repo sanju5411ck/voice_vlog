@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
   session: Session | null;
+  loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, username: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -13,16 +14,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Try to restore session from localStorage first
+    const savedSession = localStorage.getItem('supabase.auth.token');
+    if (savedSession) {
+      try {
+        const parsed = JSON.parse(savedSession);
+        if (parsed?.currentSession) {
+          setSession(parsed.currentSession);
+        }
+      } catch (e) {
+        console.error('Error parsing saved session:', e);
+      }
+    }
+
+    // Check active sessions and set the user
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session) {
+        localStorage.setItem('supabase.auth.token', JSON.stringify({
+          currentSession: session
+        }));
+      }
+      setLoading(false);
     });
 
+    // Listen for changes on auth state (sign in, sign out, etc.)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
+      setLoading(false);
+      
+      if (event === 'SIGNED_IN' && session) {
+        localStorage.setItem('supabase.auth.token', JSON.stringify({
+          currentSession: session
+        }));
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('supabase.auth.token');
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -82,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ session, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,3 +1,56 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes soundwave {
+  0%, 100% {
+    transform: scaleY(0.2);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-soundwave {
+  animation: soundwave 1s ease-in-out infinite;
+}
+
+/* Loading screen animation */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background: linear-gradient(-45deg, #4F46E5, #7C3AED, #EC4899, #4F46E5);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+/* Loading dots animation */
+@keyframes dots {
+  0%, 20% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  60% {
+    content: "...";
+  }
+  80%, 100% {
+    content: "";
+  }
+}
+
+.loading-dots::after {
+  content: "";
+  animation: dots 1.5s infinite;
+}
